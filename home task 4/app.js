@@ -13,12 +13,17 @@ svg.attr("transform",'translate(100,50)');
 svg.call(tip);
 
 
+
+
 d3.json("data.json").then((data)=>{
-  console.log(data);
+
+  newData = d3.json("newData.json");
+
+  console.log(newData[0]);
+
   var maxYScale = d3.max(
     data.map((d)=>d.length)
   );
-  console.log("maxYScale",maxYScale);
   xScale.domain([0,data.length])
   yScale.domain([0,maxYScale]);
 
@@ -35,10 +40,6 @@ d3.json("data.json").then((data)=>{
       }
     }
   }
-
-  console.log(links);
-
-
 
   var sozyvs = svg
   .selectAll("g")
@@ -59,7 +60,11 @@ d3.json("data.json").then((data)=>{
     d3.select(this)
     .attr('class',"hl");
     tip.show(d, e[i]);
+  }
 
+  function onclick(a,i){
+    d3.select(this).style("fill", "red");
+    tip.show(a[0]);
   }
 
   sozyvs
@@ -75,6 +80,7 @@ d3.json("data.json").then((data)=>{
   .attr("name",(d,j)=>d)
   .on("mouseover",onmouseover)
   .on("mouseout",onmouseout)
+  .on("click",onclick)
 
   var lineGenerator = d3.line().curve(d3.curveCardinal);
 
