@@ -27,6 +27,7 @@ function enter(country) {
   })
   current.text(country && country.name || '')
   createBars(country)
+  InfectedBars(country)
 }
 
 function leave(country) {
@@ -103,6 +104,57 @@ function createBars(country) {
   .attr('width', xScale.bandwidth())
 }
 
+function InfectedBars(country) {
+  const margin = 60;
+  const barwidth = 420 - 2 * margin;
+  const barheight = 420 - 2 * margin;
+
+  const svg = d3.select('#svg1')
+
+  const chart = svg.append('g')
+    .attr('transform', `translate(${margin}, ${margin})`)
+
+  const yScale = d3.scaleLinear()
+    .range([barheight, -20])
+    .domain([0, 20000000])
+
+  chart.append('g')
+    .call(d3.axisLeft(yScale))
+    .attr('color', 'lightblue')
+
+  const months = [
+    {m:"m1", value:country.m1},
+    {m:"m2", value:country.m2},
+    {m:"m3", value:country.m3},
+    {m:"m4", value:country.m4},
+    {m:"m5", value:country.m5},
+    {m:"m6", value:country.m6},
+    {m:"m7", value:country.m7},
+    {m:"m8", value:country.m8},
+    {m:"m9", value:country.m9},
+    {m:"m10", value:country.m10},
+    {m:"m11", value:country.m11},
+    {m:"m12", value:country.m12}
+  ]
+    
+  const xScale = d3.scaleBand()
+  .range([0, barwidth])
+  .domain(months.map((s) => s.m))
+  .padding(0.2)
+
+  chart.append('g')
+    .attr('transform', `translate(0, ${barheight})`)
+    .call(d3.axisBottom(xScale));
+
+  chart.selectAll()
+  .data(months)
+  .enter()
+  .append('rect')
+  .attr('x', (s) => xScale(s.m))
+  .attr('y', (s) => yScale(s.value))
+  .attr('height', (s) => barheight - yScale(s.value))
+  .attr('width', xScale.bandwidth())
+}
 
 //
 // Functions
@@ -192,7 +244,7 @@ function rotate(elapsed) {
 function loadData(cb) {
   d3.json('https://unpkg.com/world-atlas@1/world/110m.json', function(error, world) {
     if (error) throw error
-    d3.tsv('CountresAll.tsv', function(error, countries) {
+    d3.tsv('data_DVV.tsv', function(error, countries) {
       if (error) throw error
       cb(world, countries)
     })
