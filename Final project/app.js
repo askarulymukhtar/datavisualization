@@ -5,16 +5,16 @@
 // ms to wait after dragging before auto-rotating
 var rotationDelay = 0
 // scale of the globe (not the canvas element)
-var scaleFactor = 0.9
+var scaleFactor = 1
 // autorotation speed
-var degPerSec = 6
+var degPerSec = 3
 // start angles
 var angles = { x: -20, y: 40, z: 0}
 // colors
-var colorWater = '#fff'
-var colorLand = '#777'
-var colorGraticule = '#ccc'
-var colorCountry = '#a00'
+var colorWater = '#009dc4'
+var colorLand = '#d47b4a'
+var colorGraticule = '#000'
+var colorCountry = '#130A6A'
 
 
 //
@@ -26,10 +26,12 @@ function enter(country) {
     return parseInt(c.id, 10) === parseInt(country.id, 10)
   })
   current.text(country && country.name || '')
+  createBars(country)
 }
 
 function leave(country) {
   current.text('')
+  d3.selectAll("svg > *").remove()
 }
 
 //
@@ -55,6 +57,54 @@ var autorotate, now, diff, roation
 var currentCountry
 
 //
+// Creating bar
+//
+
+function createBars(country) {
+  const margin = 60;
+  const barwidth = 420 - 2 * margin;
+  const barheight = 420 - 2 * margin;
+
+  const svg = d3.select('svg')
+
+  const chart = svg.append('g')
+    .attr('transform', `translate(${margin}, ${margin})`)
+
+  const yScale = d3.scaleLinear()
+    .range([barheight, -20])
+    .domain([-20, 20])
+
+  chart.append('g')
+    .call(d3.axisLeft(yScale))
+    .attr('color', 'lightblue')
+
+  const quaters = [
+    {q:"Q1", value:country.Q1},
+    {q:"Q2", value:country.Q2},
+    {q:"Q3", value:country.Q3}
+  ]
+    
+  const xScale = d3.scaleBand()
+  .range([0, barwidth])
+  .domain(quaters.map((s) => s.q))
+  .padding(0.2)
+
+  chart.append('g')
+    .attr('transform', `translate(0, ${barheight})`)
+    .call(d3.axisBottom(xScale));
+
+  chart.selectAll()
+  .data(quaters)
+  .enter()
+  .append('rect')
+  .attr('x', (s) => xScale(s.q))
+  .attr('y', (s) => yScale(s.value))
+  .attr('height', (s) => barheight - yScale(s.value))
+  .attr('width', xScale.bandwidth())
+}
+
+
+//
 // Functions
 //
 
@@ -68,7 +118,7 @@ function setAngles() {
 
 function scale() {
   width = document.documentElement.clientWidth
-  height = document.documentElement.clientHeight
+  height = document.documentElement.clientHeight-200
   canvas.attr('width', width).attr('height', height)
   projection
     .scale((scaleFactor * Math.min(width, height)) / 2)
@@ -142,7 +192,7 @@ function rotate(elapsed) {
 function loadData(cb) {
   d3.json('https://unpkg.com/world-atlas@1/world/110m.json', function(error, world) {
     if (error) throw error
-    d3.tsv('https://gist.githubusercontent.com/mbostock/4090846/raw/07e73f3c2d21558489604a0bc434b3a5cf41a867/world-country-names.tsv', function(error, countries) {
+    d3.tsv('CountresAll.tsv', function(error, countries) {
       if (error) throw error
       cb(world, countries)
     })
@@ -180,6 +230,7 @@ function mousemove() {
   }
   currentCountry = c
   render()
+  d3.selectAll("svg > *").remove()
   enter(c)
 }
 
@@ -209,7 +260,6 @@ canvas
    )
   .on('mousemove', mousemove)
 
-
 loadData(function(world, cList) {
   land = topojson.feature(world, world.objects.land)
   countries = topojson.feature(world, world.objects.countries)
@@ -219,3 +269,14 @@ loadData(function(world, cList) {
   scale()
   autorotate = d3.timer(rotate)
 })
+
+//
+// Slider 
+//
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value;
+
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="https://d3js.org/d3.v4.js"></script>
+</head>
+<body>
+  <div id="my_dataviz">
+  </div>
+  <script>
+    var margin = {top:150,right:150,bottom:150,left:150},
+    width = 2000 - margin.left - margin.right;
+    height = 2000 - margin.top - margin.bottom;
+
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+      .attr("width", width+margin.left+margin.right)
+      .attr("height", height+margin.top+margin.bottom)
+      .append("g")
+      .attr("tranform","translate("+margin.left+","+margin.top+")");
+    console.log(margin);
+
+
+
+
+
+    
+//тут поменяла порт, 8000 не работал, кем-то занят
+    d3.json("http://localhost:9000/wordnet2.json", (data)=>{
+      console.log(data);
+
+      var elem = svg.selectAll("g")
+        .data(data.nodes)
+
+      var node = svg
+        .selectAll("circle")
+        .data(data.nodes)
+        .enter()
+        .append("circle")
+        .attr("r",20)
+        .attr("cx",750)
+        .attr("cy",300)
+        .style("fill", "#AA1111")
+
+      var link = svg
+        .selectAll("line")
+        .data(data.links)
+        .enter()
+        .append("line")
+        .style("stroke",function(d) {
+          console.log(d.type);
+          if (d.type == 'sin'){
+            return "blue";
+          } else if (d.type == 'hyper') {
+            return "#AA1111";
+          }
+        })
+
+
+//у rect есть возможность добавления текста
+      var node1 = svg
+        .selectAll("rect")
+        .data(data.nodes)
+        .enter()
+        .append("text")
+        .attr("x",820)
+        .attr("y",310)
+        .style("fill", "black")
+        .text(function(d) {return d.name})
+
+
+      var simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink()
+        .id((d) => d.id)
+        .links(data.links)
+        )
+        .force("charge", d3.forceManyBody().strength(-400))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .on("end",ticked);
+
+        function ticked() {
+          link
+            .attr("x1", function (d) { return d.source.x;})
+            .attr("y1", function (d) { return d.source.y;})
+            .attr("x2", function (d) { return d.target.x;})
+            .attr("y2", function (d) { return d.target.y;});
+
+
+           elem.attr("transform", function (d) {
+                return "translate(" + d.x + "," + d.y + ")";
+            });
+
+           node
+            .attr("cx", function(d) {return d.x+2.5})
+            .attr("cy",function(d) {return d.y+2.5});
+
+          node1
+            .attr("x", function(d) {return d.x - 10})
+            .attr("y",function(d) {return d.y+7});
+        }
+    });
+  </script>
+</body>
+</html>

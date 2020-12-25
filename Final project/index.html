@@ -1,5 +1,18 @@
-<script src="d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+<script src="https://d3js.org/d3-geo.v1.min.js"></script>
+<script src="https://d3js.org/topojson.v2.min.js"></script>
+<script src="https://bl.ocks.org/mbostock/raw/7ea1dde508cec6d2d95306f92642bc42/6aac691494f752142a67cc43c51a0fd09896dbd4/versor.js"></script>
 <script src="app.js" type="text/javascript" defer></script>
-
+<body>
+<h2 style="color: lightblue; text-align: center; margin-top: 2%;">Impact of COVID-19 to GDP of Countries</h2>
 <h2 id="current"></h2>
+<h2 id="description">Quarterly change percentage of GDP of</h2>
+<svg id="svg" width="480" height="480"></svg>
 <canvas id="globe"></canvas>
+<h3 style="color: lightblue; text-align: center;">Select quater of quarantine period</h3>
+<div class="slidecontainer">
+  <input type="range" min="1" max="3" value="1" class="slider" id="myRange">
+  <p style="color: lightblue; text-align: center;">Quater: <span id="demo"></span></p>
+</div>
+</body>
+<link rel="stylesheet" href="styles.css">
